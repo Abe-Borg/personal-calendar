@@ -1,0 +1,2 @@
+.header { display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid var(--color-border-tertiary); position:sticky; top:0; background:var(--color-background-primary); z-index:2; }
+.header button { margin-right:6px; }
