@@ -1,13 +1,12 @@
 import type { CalendarEvent } from '../../types';
-import { CATEGORY_COLORS } from '../../utils/colors';
 import styles from './MonthView.module.css';
 
 export function EventChip({ event, onClick }: { event: CalendarEvent; onClick: () => void }) {
-  const c = CATEGORY_COLORS[event.category];
   return (
     <div
-      style={{ background: c.bg, color: c.text }}
       className={styles.chip}
+      data-category={event.category}
+      title={event.description || undefined}
       onClick={(e) => {
         e.stopPropagation();
         onClick();

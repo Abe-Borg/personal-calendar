@@ -1,2 +1,9 @@
-.header { display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid var(--color-border-tertiary); position:sticky; top:0; background:var(--color-background-primary); z-index:2; }
-.header button { margin-right:6px; }
+.header { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:12px; border-bottom:1px solid var(--color-border-tertiary); position:sticky; top:0; background:var(--color-background-primary); z-index:2; }
+.left, .right { display:flex; gap:6px; align-items:center; }
+.title { font-size:18px; font-weight:600; }
+.header button { background:transparent; border:1px solid transparent; padding:4px 10px; border-radius:6px; }
+.header button:hover { background:var(--color-background-tertiary); border-color:var(--color-border-tertiary); }
+.add { background:var(--color-accent) !important; color:#fff !important; border-color:transparent !important; padding:6px 14px !important; }
+.add:hover { filter:brightness(.95); border-color:transparent !important; background:var(--color-accent) !important; }
+.toggle { display:none; }
+@media (max-width:700px) { .toggle { display:inline-flex; } }

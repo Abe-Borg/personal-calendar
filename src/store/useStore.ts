@@ -1,19 +1,22 @@
-import { addMonths } from 'date-fns';
 import { create } from 'zustand';
 import type { UIState } from '../types';
 
+interface RouteState {
+  view: UIState['view'];
+  currentYear: number;
+  currentMonth: number;
+  selectedDate: string | null;
+}
+
 interface StoreActions {
-  navigateMonth: (direction: 1 | -1) => void;
-  goToToday: () => void;
-  selectDate: (date: string) => void;
-  goToMonthView: () => void;
+  setRouteState: (s: RouteState) => void;
   toggleSidebar: () => void;
   openAddModal: (defaultDate?: string, defaultTime?: string) => void;
   openEditModal: (eventId: string) => void;
   closeModal: () => void;
 }
 
-const useStore = create<UIState & StoreActions>((set, get) => {
+const useStore = create<UIState & StoreActions>((set) => {
   const today = new Date();
   return {
     currentYear: today.getFullYear(),
@@ -25,17 +28,7 @@ const useStore = create<UIState & StoreActions>((set, get) => {
     modalEventId: null,
     modalDefaultDate: null,
     modalDefaultTime: null,
-    navigateMonth: (direction) => {
-      const { currentYear, currentMonth } = get();
-      const d = addMonths(new Date(currentYear, currentMonth, 1), direction);
-      set({ currentYear: d.getFullYear(), currentMonth: d.getMonth() });
-    },
-    goToToday: () => {
-      const d = new Date();
-      set({ currentYear: d.getFullYear(), currentMonth: d.getMonth(), selectedDate: null, view: 'month' });
-    },
-    selectDate: (date) => set({ selectedDate: date, view: 'day' }),
-    goToMonthView: () => set({ selectedDate: null, view: 'month' }),
+    setRouteState: (s) => set(s),
     toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
     openAddModal: (defaultDate, defaultTime) =>
       set({ modalOpen: true, modalEventId: null, modalDefaultDate: defaultDate ?? null, modalDefaultTime: defaultTime ?? null }),

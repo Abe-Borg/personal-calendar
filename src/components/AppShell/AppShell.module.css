@@ -1,3 +1,7 @@
 .shell { display:grid; grid-template-columns: var(--sidebar-width) 1fr; height:100vh; overflow:hidden; transition:grid-template-columns .25s ease; }
 .shell[data-sidebar-closed='true'] { grid-template-columns: 0 1fr; }
 .main { overflow:auto; background:var(--color-background-primary); }
+
+@media (max-width:700px) {
+  .shell, .shell[data-sidebar-closed='true'] { grid-template-columns: 0 1fr; }
+}

@@ -13,6 +13,11 @@ class CalendarDatabase extends Dexie {
       notes: 'id, order, pinned',
       attachments: 'id, eventId, noteId',
     });
+    this.version(2).stores({
+      events: 'id, date, category',
+      notes: 'id, order',
+      attachments: 'id, eventId, noteId',
+    });
   }
 }
 
