@@ -1,0 +1,21 @@
+.backdrop { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:flex-start; justify-content:center; padding:10vh 16px 16px; z-index:10; overflow:auto; }
+.dialog { background:var(--color-background-primary); border-radius:12px; width:480px; max-width:100%; padding:20px; display:flex; flex-direction:column; gap:14px; box-shadow:0 16px 48px rgba(0,0,0,.25); }
+.title { font-size:16px; font-weight:600; }
+.field { display:flex; flex-direction:column; gap:4px; }
+.field > label { font-size:12px; color:var(--color-text-secondary); text-transform:uppercase; letter-spacing:.04em; }
+.field input, .field textarea, .field select { padding:8px 10px; border:1px solid var(--color-border-tertiary); border-radius:6px; background:var(--color-background-primary); }
+.field textarea { min-height:72px; resize:vertical; font-family:inherit; }
+.row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.checkRow { display:flex; align-items:center; gap:6px; font-size:14px; }
+.checkRow input { width:auto; }
+.times { display:flex; gap:8px; }
+.times input { flex:1; }
+.categories { display:flex; gap:6px; flex-wrap:wrap; }
+.categoryBtn { padding:4px 12px; border-radius:14px; border:1px solid transparent; font-size:13px; opacity:.7; }
+.categoryBtn:hover { opacity:1; }
+.categoryBtn[data-active='true'] { opacity:1; outline:2px solid var(--color-text-primary); outline-offset:1px; }
+.actions { display:flex; gap:8px; justify-content:flex-end; margin-top:4px; }
+.deleteBtn { margin-right:auto; color:var(--color-danger); background:transparent; border:0; padding:4px 8px; }
+.deleteBtn:hover { text-decoration:underline; }
+.saveBtn { background:var(--color-accent); color:#fff; border:0; padding:8px 16px; border-radius:6px; }
+.cancelBtn { background:transparent; border:1px solid var(--color-border-tertiary); padding:8px 16px; border-radius:6px; }

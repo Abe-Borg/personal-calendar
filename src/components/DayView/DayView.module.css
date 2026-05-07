@@ -1,8 +1,12 @@
 .top { display:flex; gap:10px; align-items:center; padding:8px 12px; }
-.allday { padding:8px 12px; border-top:1px solid var(--color-border-tertiary); border-bottom:1px solid var(--color-border-tertiary); display:flex; gap:6px; }
-.grid { height:calc(100vh - 140px); overflow:auto; }
+.top h3 { font-size:18px; font-weight:600; }
+.allday { padding:8px 12px; border-top:1px solid var(--color-border-tertiary); border-bottom:1px solid var(--color-border-tertiary); display:flex; gap:6px; flex-wrap:wrap; min-height:36px; align-items:center; }
+.alldayChip { cursor:pointer; padding:2px 8px; border-radius:14px; font-size:12px; }
+.alldayChip:hover { filter:brightness(.96); }
+.empty { padding:24px 12px; color:var(--color-text-secondary); text-align:center; font-size:14px; }
+.grid { height:calc(100vh - 180px); overflow:auto; }
 .canvas { position:relative; height:1440px; }
-.row { height:60px; border-bottom:1px solid var(--color-border-tertiary); font-size:12px; color:var(--color-text-secondary); }
-.event { background:#e6f1fb; border-left:2px solid #0c447c; padding:2px 4px; border-radius:6px; overflow:hidden; cursor:pointer; }
-.alldayChip { cursor:pointer; }
-.now { position:absolute; left:0; right:0; height:2px; background:#e24b4a; }
+.row { height:60px; border-bottom:1px solid var(--color-border-tertiary); font-size:11px; color:var(--color-text-secondary); padding:2px 8px; }
+.event { padding:4px 8px; border-radius:6px; overflow:hidden; cursor:pointer; box-shadow:inset 3px 0 0 currentColor; font-size:13px; }
+.event:hover { filter:brightness(.96); }
+.now { position:absolute; left:0; right:0; height:2px; background:#e24b4a; pointer-events:none; }

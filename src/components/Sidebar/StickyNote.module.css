@@ -1,0 +1,8 @@
+.note { padding:10px; border-radius:8px; display:flex; flex-direction:column; gap:6px; }
+.row { display:flex; gap:4px; align-items:center; }
+.swatch { width:18px; height:18px; border-radius:50%; border:1px solid var(--color-border-tertiary); cursor:pointer; padding:0; }
+.swatch:hover { transform:scale(1.1); }
+.delete { margin-left:auto; background:transparent; border:0; cursor:pointer; opacity:.6; }
+.delete:hover { opacity:1; }
+.text { width:100%; min-height:60px; resize:vertical; background:transparent; border:1px dashed var(--color-border-tertiary); border-radius:4px; padding:6px; font-family:inherit; }
+.text:focus { border-style:solid; }

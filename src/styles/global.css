@@ -1,3 +1,14 @@
 *{box-sizing:border-box;margin:0;padding:0;font-family:var(--font-sans)}
 body{height:100vh;overflow:hidden;background:var(--color-background-tertiary);color:var(--color-text-primary)}
-button,input,textarea{font:inherit}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--color-accent);outline-offset:1px}
+
+[data-category="work"]{background:var(--cat-work-bg);color:var(--cat-work-fg)}
+[data-category="personal"]{background:var(--cat-personal-bg);color:var(--cat-personal-fg)}
+[data-category="milestone"]{background:var(--cat-milestone-bg);color:var(--cat-milestone-fg)}
+[data-category="design"]{background:var(--cat-design-bg);color:var(--cat-design-fg)}
+[data-category="review"]{background:var(--cat-review-bg);color:var(--cat-review-fg)}
+[data-category="deadline"]{background:var(--cat-deadline-bg);color:var(--cat-deadline-fg)}
+[data-category="meeting"]{background:var(--cat-meeting-bg);color:var(--cat-meeting-fg)}
+[data-category="other"]{background:var(--cat-other-bg);color:var(--cat-other-fg)}

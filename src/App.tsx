@@ -1,9 +1,10 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from './components/AppShell/AppShell';
 import { CalendarHeader } from './components/CalendarHeader/CalendarHeader';
 import { MonthView } from './components/MonthView/MonthView';
 import { DayView } from './components/DayView/DayView';
 import { EventModal } from './components/EventModal/EventModal';
+import { Toaster } from './components/Toaster/Toaster';
 import useStore from './store/useStore';
 import { useKeyboardShortcuts } from './utils/useKeyboardShortcuts';
 import { RouteSync } from './utils/RouteSync';
@@ -16,13 +17,14 @@ function MainPanel() {
       <CalendarHeader />
       {view === 'month' ? <MonthView /> : <DayView />}
       <EventModal />
+      <Toaster />
     </>
   );
 }
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <RouteSync />
       <AppShell>
         <Routes>
@@ -32,6 +34,6 @@ export default function App() {
           <Route path="/day/:date" element={<MainPanel />} />
         </Routes>
       </AppShell>
-    </BrowserRouter>
+    </HashRouter>
   );
 }

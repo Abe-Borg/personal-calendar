@@ -20,6 +20,19 @@ export async function deleteEvent(id: string): Promise<void> {
   });
 }
 
+export async function deleteEventWithSnapshot(id: string): Promise<(() => Promise<void>) | null> {
+  const event = await db.events.get(id);
+  if (!event) return null;
+  const attachments = await db.attachments.where('eventId').equals(id).toArray();
+  await deleteEvent(id);
+  return async () => {
+    await db.transaction('rw', db.events, db.attachments, async () => {
+      await db.events.add(event);
+      if (attachments.length) await db.attachments.bulkAdd(attachments);
+    });
+  };
+}
+
 export function useEventsForMonth(startDate: string, endDate: string) {
   return useLiveQuery(async () => {
     const candidates = await db.events.where('date').belowOrEqual(endDate).toArray();
@@ -55,6 +68,19 @@ export async function deleteNote(id: string): Promise<void> {
     await db.notes.delete(id);
     await db.attachments.where('noteId').equals(id).delete();
   });
+}
+
+export async function deleteNoteWithSnapshot(id: string): Promise<(() => Promise<void>) | null> {
+  const note = await db.notes.get(id);
+  if (!note) return null;
+  const attachments = await db.attachments.where('noteId').equals(id).toArray();
+  await deleteNote(id);
+  return async () => {
+    await db.transaction('rw', db.notes, db.attachments, async () => {
+      await db.notes.add(note);
+      if (attachments.length) await db.attachments.bulkAdd(attachments);
+    });
+  };
 }
 
 export async function reorderNotes(orderedIds: string[]): Promise<void> {
