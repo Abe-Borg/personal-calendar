@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db';
-import type { Attachment, CalendarEvent, StickyNote } from '../types';
+import { expandRecurring } from '../utils/recurrence';
+import type { CalendarEvent, StickyNote } from '../types';
 
 export async function addEvent(data: Omit<CalendarEvent, 'id'>): Promise<string> {
   const id = crypto.randomUUID();
@@ -20,11 +21,17 @@ export async function deleteEvent(id: string): Promise<void> {
 }
 
 export function useEventsForMonth(startDate: string, endDate: string) {
-  return useLiveQuery(() => db.events.where('date').between(startDate, endDate, true, true).toArray(), [startDate, endDate]);
+  return useLiveQuery(async () => {
+    const candidates = await db.events.where('date').belowOrEqual(endDate).toArray();
+    return expandRecurring(candidates, startDate, endDate);
+  }, [startDate, endDate]);
 }
 
 export function useEventsForDate(date: string) {
-  return useLiveQuery(() => db.events.where('date').equals(date).toArray(), [date]);
+  return useLiveQuery(async () => {
+    const candidates = await db.events.where('date').belowOrEqual(date).toArray();
+    return expandRecurring(candidates, date, date);
+  }, [date]);
 }
 
 export function usePinnedEvents() {

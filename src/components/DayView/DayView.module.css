@@ -3,5 +3,6 @@
 .grid { height:calc(100vh - 140px); overflow:auto; }
 .canvas { position:relative; height:1440px; }
 .row { height:60px; border-bottom:1px solid var(--color-border-tertiary); font-size:12px; color:var(--color-text-secondary); }
-.event { background:#e6f1fb; border-left:2px solid #0c447c; padding:2px 4px; border-radius:6px; overflow:hidden; }
+.event { background:#e6f1fb; border-left:2px solid #0c447c; padding:2px 4px; border-radius:6px; overflow:hidden; cursor:pointer; }
+.alldayChip { cursor:pointer; }
 .now { position:absolute; left:0; right:0; height:2px; background:#e24b4a; }

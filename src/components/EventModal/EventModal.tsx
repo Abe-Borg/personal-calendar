@@ -5,13 +5,20 @@ import useStore from '../../store/useStore';
 import { db } from '../../db/db';
 import { addEvent, deleteEvent, updateEvent } from '../../db/queries';
 import { AttachmentZone } from '../shared/AttachmentZone';
-import type { EventCategory } from '../../types';
+import type { EventCategory, RecurrenceFrequency } from '../../types';
 
 const categories: EventCategory[] = ['work', 'personal', 'milestone', 'design', 'review', 'deadline', 'meeting', 'other'];
+const recurrenceOptions: { value: RecurrenceFrequency | 'none'; label: string }[] = [
+  { value: 'none', label: 'Does not repeat' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'yearly', label: 'Yearly' },
+];
 
 export function EventModal() {
   const { modalOpen, closeModal, modalEventId, modalDefaultDate } = useStore();
-  const existing = useLiveQuery(() => (modalEventId ? db.events.get(modalEventId) : Promise.resolve(undefined)), [modalEventId]);
+  const existing = useLiveQuery(async () => (modalEventId ? db.events.get(modalEventId) : undefined), [modalEventId]);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [allDay, setAllDay] = useState(true);
@@ -19,14 +26,18 @@ export function EventModal() {
   const [endTime, setEnd] = useState('10:00');
   const [category, setCategory] = useState<EventCategory>('work');
   const [pinned, setPinned] = useState(false);
+  const [recurrence, setRecurrence] = useState<RecurrenceFrequency | 'none'>('none');
+  const [recurrenceEnd, setRecurrenceEnd] = useState('');
 
   useEffect(() => {
     if (!modalOpen) return;
     if (existing) {
       setTitle(existing.title); setDate(existing.date); setAllDay(existing.allDay);
       setStart(existing.startTime ?? '09:00'); setEnd(existing.endTime ?? '10:00'); setCategory(existing.category); setPinned(existing.pinned);
+      setRecurrence(existing.recurrence ?? 'none'); setRecurrenceEnd(existing.recurrenceEnd ?? '');
     } else {
       setTitle(''); setDate(modalDefaultDate ?? new Date().toISOString().slice(0, 10)); setAllDay(true); setStart('09:00'); setEnd('10:00'); setCategory('work'); setPinned(false);
+      setRecurrence('none'); setRecurrenceEnd('');
     }
   }, [existing, modalDefaultDate, modalOpen]);
 
@@ -43,7 +54,17 @@ export function EventModal() {
       <form style={{ background: 'white', margin: '10vh auto', width: 480, padding: 12 }} onClick={(e) => e.stopPropagation()} onSubmit={async (e) => {
         e.preventDefault();
         if (!title.trim()) return;
-        const data = { title, date, allDay, startTime: allDay ? undefined : startTime, endTime: allDay ? undefined : endTime, category, pinned };
+        const data = {
+          title,
+          date,
+          allDay,
+          startTime: allDay ? undefined : startTime,
+          endTime: allDay ? undefined : endTime,
+          category,
+          pinned,
+          recurrence: recurrence === 'none' ? undefined : recurrence,
+          recurrenceEnd: recurrence === 'none' || !recurrenceEnd ? undefined : recurrenceEnd,
+        };
         if (modalEventId) await updateEvent(modalEventId, data); else await addEvent(data);
         closeModal();
       }}>
@@ -53,6 +74,14 @@ export function EventModal() {
         {!allDay && <><input type="time" value={startTime} onChange={(e) => setStart(e.target.value)} /><input type="time" value={endTime} onChange={(e) => setEnd(e.target.value)} /></>}
         <div>{categories.map((c) => <button type="button" key={c} onClick={() => setCategory(c)}>{c}</button>)}</div>
         <label><input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} />Pin to sidebar</label>
+        <div>
+          <label>Repeat <select value={recurrence} onChange={(e) => setRecurrence(e.target.value as RecurrenceFrequency | 'none')}>
+            {recurrenceOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select></label>
+          {recurrence !== 'none' && (
+            <label> Until <input type="date" value={recurrenceEnd} min={date} onChange={(e) => setRecurrenceEnd(e.target.value)} /></label>
+          )}
+        </div>
         {modalEventId && <AttachmentZone eventId={modalEventId} />}
         <div><button type="submit">Save</button>{modalEventId && <button type="button" onClick={() => void deleteEvent(modalEventId).then(closeModal)}>Delete</button>}</div>
       </form>

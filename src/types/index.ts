@@ -10,6 +10,8 @@ export type EventCategory =
 
 export type NoteColor = 'yellow' | 'blue' | 'green' | 'pink';
 
+export type RecurrenceFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly';
+
 export interface CalendarEvent {
   id: string;
   title: string;
@@ -20,7 +22,7 @@ export interface CalendarEvent {
   category: EventCategory;
   description?: string;
   pinned: boolean;
-  recurrence?: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  recurrence?: RecurrenceFrequency;
   recurrenceEnd?: string;
 }
 

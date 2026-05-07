@@ -10,7 +10,7 @@ function minutesFromMidnight() {
 }
 
 export function DayView() {
-  const { selectedDate, goToMonthView } = useStore();
+  const { selectedDate, goToMonthView, openEditModal } = useStore();
   const day = selectedDate ?? new Date().toISOString().slice(0, 10);
   const events = useEventsForDate(day);
   const gridRef = useRef<HTMLDivElement | null>(null);
@@ -27,11 +27,11 @@ export function DayView() {
   return (
     <div>
       <div className={styles.top}><button onClick={goToMonthView}>← Month</button><h3>{day}</h3></div>
-      <div className={styles.allday}>{allDay.map((e) => <span key={e.id}>{e.title}</span>)}</div>
+      <div className={styles.allday}>{allDay.map((e) => <span key={e.id} className={styles.alldayChip} onClick={() => openEditModal(e.id)}>{e.title}</span>)}</div>
       <div className={styles.grid} ref={gridRef}>
         <div className={styles.canvas}>
           {Array.from({ length: 24 }).map((_, h) => <div key={h} className={styles.row}>{`${String(h).padStart(2, '0')}:00`}</div>)}
-          {layouts.map((l) => <div key={l.event.id} className={styles.event} style={l.style}>{l.event.title}</div>)}
+          {layouts.map((l) => <div key={l.event.id} className={styles.event} style={l.style} onClick={() => openEditModal(l.event.id)}>{l.event.title}</div>)}
           <div className={styles.now} style={{ top: minutesFromMidnight() }} />
         </div>
       </div>
