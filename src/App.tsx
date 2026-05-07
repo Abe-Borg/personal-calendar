@@ -6,9 +6,11 @@ import { DayView } from './components/DayView/DayView';
 import { EventModal } from './components/EventModal/EventModal';
 import useStore from './store/useStore';
 import { useKeyboardShortcuts } from './utils/useKeyboardShortcuts';
+import { RouteSync } from './utils/RouteSync';
 
 function MainPanel() {
   const view = useStore((s) => s.view);
+  useKeyboardShortcuts();
   return (
     <>
       <CalendarHeader />
@@ -19,9 +21,9 @@ function MainPanel() {
 }
 
 export default function App() {
-  useKeyboardShortcuts();
   return (
     <BrowserRouter>
+      <RouteSync />
       <AppShell>
         <Routes>
           <Route path="/" element={<Navigate to="/calendar" replace />} />

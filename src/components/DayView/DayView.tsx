@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
+import { parseISO } from 'date-fns';
 import useStore from '../../store/useStore';
 import { useEventsForDate } from '../../db/queries';
+import { useCalendarNav } from '../../utils/navigation';
 import { computeEventLayouts } from '../../utils/eventLayout';
 import styles from './DayView.module.css';
 
@@ -10,7 +12,8 @@ function minutesFromMidnight() {
 }
 
 export function DayView() {
-  const { selectedDate, goToMonthView, openEditModal } = useStore();
+  const { selectedDate, openEditModal } = useStore();
+  const nav = useCalendarNav();
   const day = selectedDate ?? new Date().toISOString().slice(0, 10);
   const events = useEventsForDate(day);
   const gridRef = useRef<HTMLDivElement | null>(null);
@@ -23,10 +26,14 @@ export function DayView() {
   const timed = events.filter((e) => !e.allDay);
   const allDay = events.filter((e) => e.allDay);
   const layouts = computeEventLayouts(timed);
+  const backToMonth = () => {
+    const d = parseISO(day);
+    nav.goToMonth(d.getFullYear(), d.getMonth());
+  };
 
   return (
     <div>
-      <div className={styles.top}><button onClick={goToMonthView}>← Month</button><h3>{day}</h3></div>
+      <div className={styles.top}><button onClick={backToMonth}>← Month</button><h3>{day}</h3></div>
       <div className={styles.allday}>{allDay.map((e) => <span key={e.id} className={styles.alldayChip} onClick={() => openEditModal(e.id)}>{e.title}</span>)}</div>
       <div className={styles.grid} ref={gridRef}>
         <div className={styles.canvas}>

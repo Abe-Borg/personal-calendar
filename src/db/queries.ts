@@ -35,7 +35,7 @@ export function useEventsForDate(date: string) {
 }
 
 export function usePinnedEvents() {
-  return useLiveQuery(() => db.events.where('pinned').equals(1).toArray(), []);
+  return useLiveQuery(() => db.events.filter((e) => e.pinned).toArray(), []);
 }
 
 export async function addNote(data: Omit<StickyNote, 'id' | 'createdAt' | 'updatedAt' | 'order'>): Promise<string> {
