@@ -30,11 +30,14 @@ export function AppShell({ children }: PropsWithChildren) {
   return (
     <div className={styles.shell} data-sidebar-closed={!sidebarOpen}>
       <Sidebar />
+      {/* Pointer convenience only. The drawer has its own labelled close button,
+          so keeping this out of the tab order avoids a duplicate control. */}
       {sidebarOpen && (
         <button
           type="button"
           className={styles.scrim}
-          aria-label="Close sidebar"
+          aria-hidden="true"
+          tabIndex={-1}
           onClick={toggleSidebar}
         />
       )}

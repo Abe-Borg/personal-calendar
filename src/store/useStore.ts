@@ -16,6 +16,17 @@ interface StoreActions {
   closeModal: () => void;
 }
 
+/** Matches the drawer breakpoint in AppShell.module.css. */
+const MOBILE_QUERY = '(max-width: 700px)';
+
+/**
+ * On desktop the sidebar is a layout column, so open is the right default. On
+ * mobile it is an overlay, and defaulting to open buries the calendar behind it
+ * on first load.
+ */
+const sidebarStartsOpen = () =>
+  typeof window === 'undefined' || !window.matchMedia?.(MOBILE_QUERY).matches;
+
 const useStore = create<UIState & StoreActions>((set) => {
   const today = new Date();
   return {
@@ -23,7 +34,7 @@ const useStore = create<UIState & StoreActions>((set) => {
     currentMonth: today.getMonth(),
     selectedDate: null,
     view: 'month',
-    sidebarOpen: true,
+    sidebarOpen: sidebarStartsOpen(),
     modalOpen: false,
     modalEventId: null,
     modalDefaultDate: null,

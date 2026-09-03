@@ -8,6 +8,9 @@
 .fatalDetail { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; color:var(--color-text-secondary); background:var(--color-background-secondary); padding:8px; border-radius:6px; overflow-wrap:anywhere; }
 
 @media (max-width:700px) {
-  .shell, .shell[data-sidebar-closed='true'] { grid-template-columns: 0 1fr; }
+  /* The sidebar becomes position:fixed here, which takes it out of the grid
+     flow. With two columns declared, main was left as the only in-flow item
+     and landed in the 0-width first column, rendering the app invisible. */
+  .shell, .shell[data-sidebar-closed='true'] { grid-template-columns: 1fr; }
   .scrim { display:block; position:fixed; inset:0; z-index:5; border:none; background:rgba(0,0,0,.35); }
 }
