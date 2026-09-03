@@ -1,21 +1,33 @@
-.backdrop { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:flex-start; justify-content:center; padding:10vh 16px 16px; z-index:10; overflow:auto; }
-.dialog { background:var(--color-background-primary); border-radius:12px; width:480px; max-width:100%; padding:20px; display:flex; flex-direction:column; gap:14px; box-shadow:0 16px 48px rgba(0,0,0,.25); }
-.title { font-size:16px; font-weight:600; }
-.field { display:flex; flex-direction:column; gap:4px; }
-.field > label { font-size:12px; color:var(--color-text-secondary); text-transform:uppercase; letter-spacing:.04em; }
-.field input, .field textarea, .field select { padding:8px 10px; border:1px solid var(--color-border-tertiary); border-radius:6px; background:var(--color-background-primary); }
-.field textarea { min-height:72px; resize:vertical; font-family:inherit; }
-.row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-.checkRow { display:flex; align-items:center; gap:6px; font-size:14px; }
-.checkRow input { width:auto; }
-.times { display:flex; gap:8px; }
-.times input { flex:1; }
-.categories { display:flex; gap:6px; flex-wrap:wrap; }
-.categoryBtn { padding:4px 12px; border-radius:14px; border:1px solid transparent; font-size:13px; opacity:.7; }
+.backdrop { position:fixed; inset:0; background:rgba(0,0,0,.4); display:grid; place-items:center; z-index:20; padding:16px; }
+.dialog { background:var(--color-background-primary); border-radius:12px; padding:18px; width:min(460px,100%); max-height:90vh; overflow:auto; display:flex; flex-direction:column; gap:12px; box-shadow:0 12px 40px rgba(0,0,0,.28); }
+.title { font-size:17px; font-weight:600; }
+
+.field { display:flex; flex-direction:column; gap:5px; }
+.field > label, .label { font-size:12px; color:var(--color-text-secondary); }
+.field input, .field textarea, .field select { border:1px solid var(--color-border-tertiary); border-radius:7px; padding:7px 9px; background:var(--color-background-primary); font-size:14px; width:100%; }
+.field textarea { min-height:70px; resize:vertical; }
+.row { display:flex; gap:8px; align-items:center; }
+.row select { flex:1; }
+.note { font-size:11px; color:var(--color-text-secondary); line-height:1.5; }
+
+.checkRow { display:flex; align-items:center; gap:8px; font-size:14px; }
+.checkRow input { width:16px; height:16px; }
+.times { display:flex; gap:10px; }
+.timeField { flex:1; display:flex; flex-direction:column; gap:5px; font-size:12px; color:var(--color-text-secondary); }
+.timeField input { border:1px solid var(--color-border-tertiary); border-radius:7px; padding:7px 9px; background:var(--color-background-primary); font-size:14px; color:var(--color-text-primary); }
+
+.categories { display:flex; flex-wrap:wrap; gap:5px; }
+.categoryBtn { border:1px solid transparent; border-radius:14px; padding:3px 10px; font-size:12px; text-transform:capitalize; opacity:.6; }
+.categoryBtn[data-active='true'] { opacity:1; border-color:currentColor; font-weight:600; }
 .categoryBtn:hover { opacity:1; }
-.categoryBtn[data-active='true'] { opacity:1; outline:2px solid var(--color-text-primary); outline-offset:1px; }
-.actions { display:flex; gap:8px; justify-content:flex-end; margin-top:4px; }
-.deleteBtn { margin-right:auto; color:var(--color-danger); background:transparent; border:0; padding:4px 8px; }
-.deleteBtn:hover { text-decoration:underline; }
-.saveBtn { background:var(--color-accent); color:#fff; border:0; padding:8px 16px; border-radius:6px; }
-.cancelBtn { background:transparent; border:1px solid var(--color-border-tertiary); padding:8px 16px; border-radius:6px; }
+
+.error { font-size:13px; color:var(--color-danger); background:var(--color-danger-bg); border-radius:6px; padding:7px 9px; }
+
+.actions { display:flex; gap:8px; justify-content:flex-end; padding-top:2px; }
+.actions button { border-radius:7px; padding:7px 14px; font-size:13px; border:1px solid var(--color-border-tertiary); background:var(--color-background-primary); }
+.deleteBtn { margin-right:auto; color:var(--color-danger); }
+.deleteBtn:hover { background:var(--color-danger-bg); }
+.deleteBtn[data-confirming='true'] { background:var(--color-danger); color:#fff; border-color:var(--color-danger); font-weight:600; }
+.cancelBtn:hover { background:var(--color-background-tertiary); }
+.saveBtn { background:var(--color-accent); color:#fff; border-color:var(--color-accent); font-weight:600; }
+.saveBtn:hover { filter:brightness(1.06); }

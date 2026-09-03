@@ -1,5 +1,6 @@
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from './components/AppShell/AppShell';
+import { ErrorBoundary } from './components/AppShell/ErrorBoundary';
 import { CalendarHeader } from './components/CalendarHeader/CalendarHeader';
 import { MonthView } from './components/MonthView/MonthView';
 import { DayView } from './components/DayView/DayView';
@@ -27,12 +28,14 @@ export default function App() {
     <HashRouter>
       <RouteSync />
       <AppShell>
-        <Routes>
-          <Route path="/" element={<Navigate to="/calendar" replace />} />
-          <Route path="/calendar" element={<MainPanel />} />
-          <Route path="/calendar/:year/:month" element={<MainPanel />} />
-          <Route path="/day/:date" element={<MainPanel />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<Navigate to="/calendar" replace />} />
+            <Route path="/calendar" element={<MainPanel />} />
+            <Route path="/calendar/:year/:month" element={<MainPanel />} />
+            <Route path="/day/:date" element={<MainPanel />} />
+          </Routes>
+        </ErrorBoundary>
       </AppShell>
     </HashRouter>
   );

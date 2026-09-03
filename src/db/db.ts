@@ -8,6 +8,8 @@ class CalendarDatabase extends Dexie {
 
   constructor() {
     super('my-calendar-db');
+    // v1 indexed `pinned`; IndexedDB cannot index booleans, so v2 dropped it and
+    // pinned queries filter in memory instead.
     this.version(1).stores({
       events: 'id, date, category, pinned',
       notes: 'id, order, pinned',
@@ -22,3 +24,17 @@ class CalendarDatabase extends Dexie {
 }
 
 export const db = new CalendarDatabase();
+
+/**
+ * IndexedDB is unavailable in some private-browsing modes and can be blocked by
+ * browser settings. Without this the app renders an empty calendar and silently
+ * discards everything the user types.
+ */
+export async function openDatabase(): Promise<string | null> {
+  try {
+    await db.open();
+    return null;
+  } catch (err) {
+    return err instanceof Error ? err.message : 'Unknown error';
+  }
+}

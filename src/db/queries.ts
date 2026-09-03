@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db';
 import { expandRecurring } from '../utils/recurrence';
-import type { CalendarEvent, StickyNote } from '../types';
+import type { Attachment, CalendarEvent, StickyNote } from '../types';
 
 export async function addEvent(data: Omit<CalendarEvent, 'id'>): Promise<string> {
   const id = crypto.randomUUID();
@@ -25,10 +25,11 @@ export async function deleteEventWithSnapshot(id: string): Promise<(() => Promis
   if (!event) return null;
   const attachments = await db.attachments.where('eventId').equals(id).toArray();
   await deleteEvent(id);
+  // put, not add: the user may have re-created the same row before hitting Undo.
   return async () => {
     await db.transaction('rw', db.events, db.attachments, async () => {
-      await db.events.add(event);
-      if (attachments.length) await db.attachments.bulkAdd(attachments);
+      await db.events.put(event);
+      if (attachments.length) await db.attachments.bulkPut(attachments);
     });
   };
 }
@@ -49,6 +50,14 @@ export function useEventsForDate(date: string) {
 
 export function usePinnedEvents() {
   return useLiveQuery(() => db.events.filter((e) => e.pinned).toArray(), []);
+}
+
+/** Drives the first-run hint: distinguishes "empty month" from "empty database". */
+export function useLibraryCounts() {
+  return useLiveQuery(async () => {
+    const [events, notes] = await Promise.all([db.events.count(), db.notes.count()]);
+    return { events, notes };
+  }, []);
 }
 
 export async function addNote(data: Omit<StickyNote, 'id' | 'createdAt' | 'updatedAt' | 'order'>): Promise<string> {
@@ -77,8 +86,8 @@ export async function deleteNoteWithSnapshot(id: string): Promise<(() => Promise
   await deleteNote(id);
   return async () => {
     await db.transaction('rw', db.notes, db.attachments, async () => {
-      await db.notes.add(note);
-      if (attachments.length) await db.attachments.bulkAdd(attachments);
+      await db.notes.put(note);
+      if (attachments.length) await db.attachments.bulkPut(attachments);
     });
   };
 }
@@ -112,10 +121,18 @@ export async function deleteAttachment(id: string): Promise<void> {
   await db.attachments.delete(id);
 }
 
-export function useAttachmentsForEvent(eventId: string) {
-  return useLiveQuery(() => db.attachments.where('eventId').equals(eventId).toArray(), [eventId]);
+// Both hooks tolerate an undefined id so AttachmentZone can call them
+// unconditionally rather than picking one behind a ternary.
+export function useAttachmentsForEvent(eventId: string | undefined) {
+  return useLiveQuery(
+    () => (eventId ? db.attachments.where('eventId').equals(eventId).toArray() : Promise.resolve<Attachment[]>([])),
+    [eventId],
+  );
 }
 
-export function useAttachmentsForNote(noteId: string) {
-  return useLiveQuery(() => db.attachments.where('noteId').equals(noteId).toArray(), [noteId]);
+export function useAttachmentsForNote(noteId: string | undefined) {
+  return useLiveQuery(
+    () => (noteId ? db.attachments.where('noteId').equals(noteId).toArray() : Promise.resolve<Attachment[]>([])),
+    [noteId],
+  );
 }

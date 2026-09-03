@@ -1,16 +1,13 @@
-export type EventCategory =
-  | 'work'
-  | 'personal'
-  | 'milestone'
-  | 'design'
-  | 'review'
-  | 'deadline'
-  | 'meeting'
-  | 'other';
+export const EVENT_CATEGORIES = [
+  'work', 'personal', 'milestone', 'design', 'review', 'deadline', 'meeting', 'other',
+] as const;
+export type EventCategory = (typeof EVENT_CATEGORIES)[number];
 
-export type NoteColor = 'yellow' | 'blue' | 'green' | 'pink';
+export const NOTE_COLOR_NAMES = ['yellow', 'blue', 'green', 'pink'] as const;
+export type NoteColor = (typeof NOTE_COLOR_NAMES)[number];
 
-export type RecurrenceFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly';
+export const RECURRENCE_FREQUENCIES = ['daily', 'weekly', 'monthly', 'yearly'] as const;
+export type RecurrenceFrequency = (typeof RECURRENCE_FREQUENCIES)[number];
 
 export interface CalendarEvent {
   id: string;

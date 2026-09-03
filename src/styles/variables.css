@@ -7,8 +7,10 @@
   --color-border-tertiary:rgba(0,0,0,.12);
   --color-accent:#3b73d8;
   --color-danger:#a31818;
+  --color-danger-bg:#fbeaea;
+  --color-today-bg:#f3f7fd;
   --sidebar-width:280px;
-  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
 
   --cat-work-bg:#E6F1FB;       --cat-work-fg:#0C447C;
   --cat-personal-bg:#EAF3DE;   --cat-personal-fg:#27500A;
@@ -19,6 +21,7 @@
   --cat-meeting-bg:#FBEAF0;    --cat-meeting-fg:#72243E;
   --cat-other-bg:#F1EFE8;      --cat-other-fg:#444441;
 }
+
 @media (prefers-color-scheme: dark) {
   :root {
     --color-background-primary:#1c1c1a;
@@ -28,5 +31,19 @@
     --color-text-secondary:#a0a09a;
     --color-border-tertiary:rgba(255,255,255,.1);
     --color-accent:#6b9ce8;
+    --color-danger:#f08b8b;
+    --color-danger-bg:#3a1d1d;
+    --color-today-bg:#22303f;
+
+    /* Without these the category chips keep their light pastel backgrounds and
+       glare against the dark shell. */
+    --cat-work-bg:#17324F;       --cat-work-fg:#AFCFF0;
+    --cat-personal-bg:#25401A;   --cat-personal-fg:#C4E0A5;
+    --cat-milestone-bg:#4A2020;  --cat-milestone-fg:#F0B0B0;
+    --cat-design-bg:#2C2A56;     --cat-design-fg:#C0BBF0;
+    --cat-review-bg:#4A3512;     --cat-review-fg:#E9C88C;
+    --cat-deadline-bg:#4A2A1B;   --cat-deadline-fg:#F0B79C;
+    --cat-meeting-bg:#4A2233;    --cat-meeting-fg:#F0B0C6;
+    --cat-other-bg:#3A3A36;      --cat-other-fg:#CACAC2;
   }
 }

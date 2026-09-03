@@ -1,8 +1,12 @@
-.note { padding:10px; border-radius:8px; display:flex; flex-direction:column; gap:6px; }
+.note { border-radius:8px; padding:8px; display:flex; flex-direction:column; gap:6px; box-shadow:0 1px 3px rgba(0,0,0,.12); }
+.note[data-dragging='true'] { opacity:.55; z-index:2; position:relative; }
 .row { display:flex; gap:4px; align-items:center; }
-.swatch { width:18px; height:18px; border-radius:50%; border:1px solid var(--color-border-tertiary); cursor:pointer; padding:0; }
-.swatch:hover { transform:scale(1.1); }
-.delete { margin-left:auto; background:transparent; border:0; cursor:pointer; opacity:.6; }
-.delete:hover { opacity:1; }
-.text { width:100%; min-height:60px; resize:vertical; background:transparent; border:1px dashed var(--color-border-tertiary); border-radius:4px; padding:6px; font-family:inherit; }
-.text:focus { border-style:solid; }
+.handle { cursor:grab; font-size:13px; line-height:1; opacity:.5; padding:2px 3px; border-radius:4px; touch-action:none; }
+.handle:hover { opacity:1; background:rgba(0,0,0,.08); }
+.handle:active { cursor:grabbing; }
+.swatch { width:14px; height:14px; border-radius:50%; border:1px solid rgba(0,0,0,.18); padding:0; }
+.swatch[data-active='true'] { outline:2px solid currentColor; outline-offset:1px; }
+.delete { margin-left:auto; background:none; border:none; font-size:12px; opacity:.6; padding:2px 4px; border-radius:4px; }
+.delete:hover { opacity:1; background:rgba(0,0,0,.08); }
+.text { background:none; border:none; resize:vertical; min-height:56px; font-size:13px; line-height:1.5; width:100%; }
+.text:focus { outline:none; }
