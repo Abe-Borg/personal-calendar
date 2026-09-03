@@ -7,7 +7,7 @@ A local-first personal calendar that runs entirely in the browser. No server, no
 - **Month view** with category-colored event chips (up to 3 per day + "+N more"), today highlighted, and a `+` on each day to add an event straight to it
 - **Day view** with a 24-hour timeline, all-day strip, live current-time indicator, and overlap-aware event layout. Click any hour to create an event at that time
 - **Event editor** with title, date, all-day toggle, start/end times, 8 categories, pin-to-sidebar, description, and **recurrence** (daily / weekly / monthly / yearly with optional end date)
-- **File attachments** on events and sticky notes (any size, kept as Blobs in IndexedDB), with drag-and-drop
+- **File attachments** on events and sticky notes, kept as Blobs in IndexedDB, with drag-and-drop
 - **Sticky notes** in the sidebar with 4 colors, per-note attachments, and reordering by dragging the grip handle or by keyboard (focus a handle, <kbd>Space</kbd>, arrow keys, <kbd>Space</kbd>)
 - **Pinned-events list** in the sidebar, click to jump to the day
 - **JSON export / import** for portable backup, with validation on the way in
@@ -77,6 +77,9 @@ There is no linter configured. `npm run build` runs `tsc -b` first, so type erro
 - **Monthly series clamp to the last day of shorter months.** A monthly event on the 31st shows on Feb 28 (or Feb 29), then returns to the 31st in March. It never drifts and always fires once per month.
 - **No reminders, notifications, time zones, or sharing.** Everything is stored and displayed in whatever timezone the browser is currently in.
 - **Single-user, single-browser** — no sync across devices.
+- **Attachments are added after an event exists.** Save a new event, reopen it, then attach.
+- **A single attachment over roughly 384 MB cannot be included in a backup.** Base64 encoding hits the browser's maximum string length. Export refuses and names the file rather than writing a backup with the payload silently missing — but that attachment is then only as safe as the browser profile holding it.
+- **Exporting a very large database is slow and holds the data in memory** while it encodes. It stays responsive between files, but a multi-hundred-megabyte export will take a while.
 - **Editing a note is saved shortly after you stop typing**, or immediately when you click away. Closing the tab mid-keystroke without leaving the field can drop the last fragment.
 - **Week view, search, and month drag-to-move are not implemented.**
 

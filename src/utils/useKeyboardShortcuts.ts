@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { todayISO } from './dateHelpers';
+import { defaultNewEventDate } from './dateHelpers';
 import { useCalendarNav } from './navigation';
 import useStore from '../store/useStore';
 
@@ -41,7 +41,7 @@ export function useKeyboardShortcuts() {
           e.preventDefault(); nav.goToToday();
           break;
         case 'n': case 'N':
-          e.preventDefault(); openAddModal(selectedDate ?? todayISO());
+          e.preventDefault(); openAddModal(defaultNewEventDate(selectedDate, currentYear, currentMonth));
           break;
       }
     };

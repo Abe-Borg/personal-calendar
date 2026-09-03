@@ -41,7 +41,7 @@ export function AppShell({ children }: PropsWithChildren) {
           onClick={toggleSidebar}
         />
       )}
-      <main className={styles.main}>{children}</main>
+      <main className={styles.main} id="main-panel" tabIndex={-1}>{children}</main>
     </div>
   );
 }

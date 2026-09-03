@@ -15,6 +15,8 @@
 .cell[data-today='true'] .dayNum { background:var(--color-accent); color:#fff; }
 .addDay { background:none; border:none; color:var(--color-text-secondary); font-size:14px; line-height:1; width:20px; height:20px; border-radius:5px; opacity:0; }
 .cell:hover .addDay, .addDay:focus-visible { opacity:1; }
+/* Touch has no hover, and the first-run hint tells people to press this. */
+@media (hover: none) { .addDay { opacity:1; } }
 .addDay:hover { background:var(--color-background-tertiary); color:var(--color-text-primary); }
 
 .chip { border:none; text-align:left; font-size:11px; padding:2px 6px; border-radius:5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block; width:100%; }

@@ -112,7 +112,11 @@ export function EventModal() {
     const raf = requestAnimationFrame(() => titleRef.current?.focus());
     return () => {
       cancelAnimationFrame(raf);
-      restoreFocusRef.current?.focus?.();
+      // Deleting an event removes the chip that opened the dialog, so restoring
+      // to it would silently drop focus onto <body>.
+      const previous = restoreFocusRef.current;
+      if (previous?.isConnected) previous.focus();
+      else document.getElementById('main-panel')?.focus();
     };
   }, [modalOpen]);
 
@@ -183,8 +187,15 @@ export function EventModal() {
       recurrence: recurrence === 'none' ? undefined : recurrence,
       recurrenceEnd: recurrence === 'none' || !recurrenceEnd ? undefined : recurrenceEnd,
     };
-    if (modalEventId) await updateEvent(modalEventId, data);
-    else await addEvent(data);
+    try {
+      if (modalEventId) await updateEvent(modalEventId, data);
+      else await addEvent(data);
+    } catch (err) {
+      // Storage can refuse the write (quota, blocked site data). Closing here
+      // would throw away everything the user typed with no explanation.
+      setError(`Could not save: ${(err as Error).message}`);
+      return;
+    }
     closeModal();
   };
 
@@ -198,6 +209,10 @@ export function EventModal() {
     }
     const name = existing?.title ?? 'Event';
     const restore = await deleteEventWithSnapshot(modalEventId);
+    // The chip that opened this dialog is still in the DOM right now — the live
+    // query removes it a tick later — so restoring focus to it would land on
+    // <body> once it goes. Send focus to the panel instead.
+    restoreFocusRef.current = null;
     closeModal();
     if (restore) {
       pushToast({
@@ -325,7 +340,11 @@ export function EventModal() {
           )}
         </div>
 
-        {modalEventId && <AttachmentZone eventId={modalEventId} />}
+        {modalEventId ? (
+          <AttachmentZone eventId={modalEventId} />
+        ) : (
+          <p className={styles.note}>Save the event first, then reopen it to attach files.</p>
+        )}
 
         {error && <p className={styles.error} role="alert">{error}</p>}
 

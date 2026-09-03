@@ -176,3 +176,66 @@ describe('export -> import round trip', () => {
     expect(JSON.parse(await exportToJson()).version).toBe(EXPORT_VERSION);
   });
 });
+
+describe('import does not create unreachable or misordered rows', () => {
+  it('skips an attachment whose parent row is nowhere to be found', async () => {
+    const summary = await importFromJson(backup({
+      attachments: [{ id: 'orphan', eventId: 'no-such-event', data: 'AAA=', name: 'ghost.bin', mimeType: 'application/octet-stream' }],
+    }));
+    expect(summary.attachments).toBe(0);
+    expect(summary.skipped).toBe(1);
+    expect(await db.attachments.count()).toBe(0);
+  });
+
+  it('keeps an attachment whose parent arrives in the same file', async () => {
+    const summary = await importFromJson(backup({
+      events: [validEvent({ id: 'e1' })],
+      attachments: [{ id: 'a1', eventId: 'e1', data: 'AAA=', name: 'ok.bin', mimeType: 'application/octet-stream' }],
+    }));
+    expect(summary.attachments).toBe(1);
+    expect(summary.skipped).toBe(0);
+  });
+
+  it('keeps an attachment whose parent already exists locally', async () => {
+    await db.events.put(validEvent({ id: 'local' }));
+    const summary = await importFromJson(backup({
+      attachments: [{ id: 'a2', eventId: 'local', data: 'AAA=', name: 'ok.bin', mimeType: 'application/octet-stream' }],
+    }));
+    expect(summary.attachments).toBe(1);
+  });
+
+  it('appends imported notes after existing ones instead of interleaving', async () => {
+    await db.notes.put(validNote({ id: 'mine-a', content: 'mine A', order: 0 }));
+    await db.notes.put(validNote({ id: 'mine-b', content: 'mine B', order: 1 }));
+    await importFromJson(backup({
+      notes: [
+        validNote({ id: 'in-1', content: 'imported 1', order: 0 }),
+        validNote({ id: 'in-2', content: 'imported 2', order: 1 }),
+      ],
+    }));
+    const ordered = (await db.notes.orderBy('order').toArray()).map((n) => n.content);
+    expect(ordered).toEqual(['mine A', 'mine B', 'imported 1', 'imported 2']);
+  });
+
+  it('leaves a re-imported note where it already sits', async () => {
+    await db.notes.put(validNote({ id: 'n1', content: 'first', order: 0 }));
+    await db.notes.put(validNote({ id: 'n2', content: 'second', order: 1 }));
+    await importFromJson(backup({ notes: [validNote({ id: 'n1', content: 'first edited', order: 0 })] }));
+    const ordered = (await db.notes.orderBy('order').toArray()).map((n) => n.content);
+    expect(ordered).toEqual(['first edited', 'second']);
+  });
+});
+
+describe('attachment size reflects the decoded bytes', () => {
+  it('ignores a size the file claims but did not deliver', () => {
+    const parsed = parseAttachment({
+      id: 'a', eventId: 'e', data: '', name: 'movie.mp4', mimeType: 'video/mp4', size: 402653167,
+    });
+    expect(parsed?.size).toBe(0);
+  });
+
+  it('reports the real length for a genuine payload', () => {
+    // "AAAA" decodes to 3 bytes
+    expect(parseAttachment({ id: 'a', eventId: 'e', data: 'AAAA', mimeType: 'application/octet-stream' })?.size).toBe(3);
+  });
+});

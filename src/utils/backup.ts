@@ -44,7 +44,15 @@ function bytesToBase64(bytes: Uint8Array): string {
   for (let i = 0; i < bytes.length; i += CHUNK) {
     binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
   }
-  return btoa(binary);
+  const encoded = btoa(binary);
+  // Past the engine's maximum string length btoa returns "" instead of
+  // throwing, which would write a backup whose payload is silently gone while
+  // still reporting success. Verified: 402,653,166 bytes encodes, one more
+  // returns an empty string.
+  if (encoded.length !== Math.ceil(bytes.length / 3) * 4) {
+    throw new RangeError('Attachment is too large to encode into a backup.');
+  }
+  return encoded;
 }
 
 function base64ToArrayBuffer(base64: string): ArrayBuffer {
@@ -120,7 +128,9 @@ export function parseAttachment(raw: unknown): Attachment | null {
     noteId: isNonEmptyString(raw.noteId) ? raw.noteId : undefined,
     name: typeof raw.name === 'string' ? raw.name : 'attachment',
     mimeType: typeof raw.mimeType === 'string' ? raw.mimeType : '',
-    size: typeof raw.size === 'number' && raw.size >= 0 ? raw.size : blob.size,
+    // The bytes we actually decoded, never the size the file claims: a
+    // truncated payload would otherwise display its original size.
+    size: blob.size,
     data: blob,
     createdAt: typeof raw.createdAt === 'string' ? raw.createdAt : new Date().toISOString(),
   };
@@ -132,9 +142,21 @@ export async function exportToJson(): Promise<string> {
     db.notes.toArray(),
     db.attachments.toArray(),
   ]);
-  const serialized = await Promise.all(
-    attachments.map(async (a) => ({ ...a, data: await blobToBase64(a.data) })),
-  );
+  // One at a time, so a failure names the file and so every base64 string is
+  // not held in memory simultaneously.
+  const serialized: ExportedAttachment[] = [];
+  for (const a of attachments) {
+    // Encoding is synchronous CPU; yielding between files keeps a many-file
+    // export from locking the tab for its whole duration.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    try {
+      serialized.push({ ...a, data: await blobToBase64(a.data) });
+    } catch {
+      throw new Error(
+        `"${a.name}" (${(a.size / 1048576).toFixed(0)} MB) is too large to include in a backup. Remove it and export again.`,
+      );
+    }
+  }
   const out: ExportFile = {
     version: EXPORT_VERSION,
     exportedAt: new Date().toISOString(),
@@ -177,16 +199,38 @@ export async function importFromJson(json: string): Promise<ImportSummary> {
   const events = (Array.isArray(data.events) ? data.events : []).map(parseEvent).filter(keep);
   const notes = (Array.isArray(data.notes) ? data.notes : [])
     .map((raw, i) => parseNote(raw, i)).filter(keep);
-  const attachments = (Array.isArray(data.attachments) ? data.attachments : [])
+  const parsedAttachments = (Array.isArray(data.attachments) ? data.attachments : [])
     .map(parseAttachment).filter(keep);
 
+  let storedAttachments = 0;
   await db.transaction('rw', db.events, db.notes, db.attachments, async () => {
     if (events.length) await db.events.bulkPut(events);
-    if (notes.length) await db.notes.bulkPut(notes);
-    if (attachments.length) await db.attachments.bulkPut(attachments);
+
+    if (notes.length) {
+      // Both sets number their order from 0, so without re-basing, imported
+      // notes interleave with the user's own instead of appending after them.
+      let nextOrder = ((await db.notes.orderBy('order').last())?.order ?? -1) + 1;
+      const ordered = [...notes].sort((a, b) => a.order - b.order);
+      for (const note of ordered) {
+        const already = await db.notes.get(note.id);
+        note.order = already ? already.order : nextOrder++;
+      }
+      await db.notes.bulkPut(ordered);
+    }
+
+    // An attachment whose parent row is absent can never be shown or deleted
+    // through the UI, so it would occupy the storage quota permanently.
+    const rooted: Attachment[] = [];
+    for (const a of parsedAttachments) {
+      const parent = a.eventId ? await db.events.get(a.eventId) : await db.notes.get(a.noteId!);
+      if (parent) rooted.push(a);
+      else skipped++;
+    }
+    if (rooted.length) await db.attachments.bulkPut(rooted);
+    storedAttachments = rooted.length;
   });
 
-  return { events: events.length, notes: notes.length, attachments: attachments.length, skipped };
+  return { events: events.length, notes: notes.length, attachments: storedAttachments, skipped };
 }
 
 export function downloadJson(content: string, filename: string): void {

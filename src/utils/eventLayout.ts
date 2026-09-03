@@ -11,6 +11,18 @@ export interface EventLayout {
 const MIN_HEIGHT_MINUTES = 20;
 const DEFAULT_DURATION_MINUTES = 60;
 
+/**
+ * IndexedDB returns same-date rows in primary-key order, i.e. uuid order, so
+ * without this a month cell showed an arbitrary three of a day's events in
+ * arbitrary order while the day view showed them sorted.
+ */
+export function compareForDisplay(a: CalendarEvent, b: CalendarEvent): number {
+  if (a.allDay !== b.allDay) return a.allDay ? -1 : 1;
+  const byStart = minutesFromMidnight(a.startTime) - minutesFromMidnight(b.startTime);
+  if (byStart !== 0) return byStart;
+  return a.title.localeCompare(b.title);
+}
+
 interface Span { event: CalendarEvent; start: number; end: number }
 
 export function computeEventLayouts(events: CalendarEvent[]): EventLayout[] {

@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db';
 import { expandRecurring } from '../utils/recurrence';
+import { compareForDisplay } from '../utils/eventLayout';
 import type { Attachment, CalendarEvent, StickyNote } from '../types';
 
 export async function addEvent(data: Omit<CalendarEvent, 'id'>): Promise<string> {
@@ -37,14 +38,14 @@ export async function deleteEventWithSnapshot(id: string): Promise<(() => Promis
 export function useEventsForMonth(startDate: string, endDate: string) {
   return useLiveQuery(async () => {
     const candidates = await db.events.where('date').belowOrEqual(endDate).toArray();
-    return expandRecurring(candidates, startDate, endDate);
+    return expandRecurring(candidates, startDate, endDate).sort(compareForDisplay);
   }, [startDate, endDate]);
 }
 
 export function useEventsForDate(date: string) {
   return useLiveQuery(async () => {
     const candidates = await db.events.where('date').belowOrEqual(date).toArray();
-    return expandRecurring(candidates, date, date);
+    return expandRecurring(candidates, date, date).sort(compareForDisplay);
   }, [date]);
 }
 

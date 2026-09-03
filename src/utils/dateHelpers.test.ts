@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { fromISODate, isISODate, isTimeString, minutesFromMidnight, monthRange, toISODate } from './dateHelpers';
+import {
+  defaultNewEventDate, fromISODate, isISODate, isTimeString, minutesFromMidnight, monthRange, toISODate, todayISO,
+} from './dateHelpers';
 
 const SAMPLES = ['2026-01-01', '2026-03-08', '2026-06-15', '2026-10-15', '2026-11-01', '2026-12-31', '2024-02-29'];
 
@@ -66,5 +68,23 @@ describe('monthRange', () => {
     expect(monthRange(2026, 1)).toEqual({ start: '2026-02-01', end: '2026-02-28' });
     expect(monthRange(2024, 1)).toEqual({ start: '2024-02-01', end: '2024-02-29' });
     expect(monthRange(2026, 11)).toEqual({ start: '2026-12-01', end: '2026-12-31' });
+  });
+});
+
+describe('defaultNewEventDate', () => {
+  it('uses the selected day when there is one', () => {
+    expect(defaultNewEventDate('2026-03-09', 2026, 11)).toBe('2026-03-09');
+  });
+
+  it('uses today when the current month is on screen', () => {
+    const today = todayISO();
+    const [y, m] = today.split('-').map(Number);
+    expect(defaultNewEventDate(null, y, m - 1)).toBe(today);
+  });
+
+  it('uses the first of the month being browsed, not today', () => {
+    // Seeding today here filed the event into a month the user was not viewing.
+    expect(defaultNewEventDate(null, 2030, 6)).toBe('2030-07-01');
+    expect(defaultNewEventDate(null, 1999, 0)).toBe('1999-01-01');
   });
 });

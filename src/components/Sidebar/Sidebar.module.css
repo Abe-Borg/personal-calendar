@@ -1,7 +1,7 @@
 .sidebar { overflow:auto; border-right:1px solid var(--color-border-tertiary); background:var(--color-background-secondary); padding:12px; display:flex; flex-direction:column; gap:12px; min-width:0; }
 .toolbar { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
-.toolbar button, .toolbar label { background:var(--color-background-primary); border:1px solid var(--color-border-tertiary); padding:4px 10px; border-radius:6px; font-size:13px; cursor:pointer; }
-.toolbar button:hover, .toolbar label:hover { background:var(--color-background-tertiary); }
+.toolbar button { background:var(--color-background-primary); border:1px solid var(--color-border-tertiary); padding:4px 10px; border-radius:6px; font-size:13px; cursor:pointer; }
+.toolbar button:hover { background:var(--color-background-tertiary); }
 .closeDrawer { display:none; margin-left:auto; }
 .notes { display:flex; flex-direction:column; gap:8px; max-height:50vh; overflow:auto; }
 .section { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--color-text-secondary); margin-top:4px; }
