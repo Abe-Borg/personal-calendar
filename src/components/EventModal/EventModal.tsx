@@ -64,9 +64,6 @@ export function EventModal() {
       initializedFor.current = null;
       return;
     }
-    // Identity, not emptiness: dexie-react-hooks keeps returning the PREVIOUS
-    // row while a new key loads, so `undefined` is not a reliable "still
-    // loading" test once any event has been opened.
     if (modalEventId && existing?.id !== modalEventId) return;
 
     const key = modalEventId ?? `new:${modalDefaultDate ?? ''}:${modalDefaultTime ?? ''}`;
@@ -102,6 +99,13 @@ export function EventModal() {
     setRecurrenceEnd('');
   }, [existing, modalDefaultDate, modalDefaultTime, modalEventId, modalOpen]);
 
+  // Must not wait for the row: the delete confirmation stays armed across a
+  // switch otherwise, and a Delete click would skip its own confirm step.
+  useEffect(() => {
+    setConfirmingDelete(false);
+    setError(null);
+  }, [modalEventId, modalOpen]);
+
   useEffect(() => {
     if (!modalOpen) return;
     restoreFocusRef.current = document.activeElement as HTMLElement | null;
@@ -112,6 +116,9 @@ export function EventModal() {
     };
   }, [modalOpen]);
 
+  // dexie-react-hooks keeps returning the previous key's row while a new query
+  // resolves, so until the ids match, the fields still hold the last event.
+  const awaitingRow = Boolean(modalEventId) && existing?.id !== modalEventId;
   const isSeries = Boolean(existing?.recurrence);
   const deleteLabel = useMemo(() => {
     if (!confirmingDelete) return 'Delete';
@@ -119,6 +126,27 @@ export function EventModal() {
   }, [confirmingDelete, isSeries]);
 
   if (!modalOpen) return null;
+
+  if (awaitingRow) {
+    return createPortal(
+      <div className={styles.backdrop} onMouseDown={closeModal}>
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="evt-heading"
+          className={styles.dialog}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <div className={styles.title} id="evt-heading">Edit event</div>
+          <p className={styles.note}>Loading…</p>
+          <div className={styles.actions}>
+            <button type="button" className={styles.cancelBtn} onClick={closeModal}>Cancel</button>
+          </div>
+        </div>
+      </div>,
+      document.body,
+    );
+  }
 
   const validate = (): string | null => {
     if (!title.trim()) return 'Give the event a title.';
