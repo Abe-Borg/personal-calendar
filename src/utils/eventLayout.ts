@@ -1,56 +1,75 @@
 import type { CSSProperties } from 'react';
 import type { CalendarEvent } from '../types';
+import { minutesFromMidnight } from './dateHelpers';
 
 export interface EventLayout {
   event: CalendarEvent;
   style: CSSProperties;
 }
 
-const toMinutes = (time = '00:00') => {
-  const [h, m] = time.split(':').map(Number);
-  return h * 60 + m;
-};
+/** One minute of the day is one pixel tall, matching the 60px hour rows in DayView. */
+const MIN_HEIGHT_MINUTES = 20;
+const DEFAULT_DURATION_MINUTES = 60;
 
-const getTopHeight = (event: CalendarEvent) => {
-  const top = toMinutes(event.startTime);
-  const end = toMinutes(event.endTime ?? '23:59');
-  return { top, height: Math.max(end - top, 20) };
-};
+interface Span { event: CalendarEvent; start: number; end: number }
 
 export function computeEventLayouts(events: CalendarEvent[]): EventLayout[] {
-  const sorted = [...events].sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime));
-  const clusters: CalendarEvent[][] = [];
-  let cluster: CalendarEvent[] = [];
-  let clusterEnd = -1;
+  const spans: Span[] = events
+    .map((event) => {
+      const start = minutesFromMidnight(event.startTime, 0);
+      const end = minutesFromMidnight(event.endTime, start + DEFAULT_DURATION_MINUTES);
+      return { event, start, end: Math.max(end, start + MIN_HEIGHT_MINUTES) };
+    })
+    .sort((a, b) => a.start - b.start || a.end - b.end);
 
-  for (const e of sorted) {
-    const start = toMinutes(e.startTime);
-    const end = toMinutes(e.endTime ?? '23:59');
-    if (start < clusterEnd) {
-      cluster.push(e);
-      clusterEnd = Math.max(clusterEnd, end);
-    } else {
-      if (cluster.length) clusters.push(cluster);
-      cluster = [e];
-      clusterEnd = end;
-    }
-  }
-  if (cluster.length) clusters.push(cluster);
+  const out: EventLayout[] = [];
+  let cluster: Span[] = [];
+  let clusterEnd = -Infinity;
 
-  return clusters.flatMap((c) =>
-    c.map((event, i) => {
-      const widthPct = 100 / c.length;
-      const { top, height } = getTopHeight(event);
-      return {
-        event,
+  /**
+   * Within a cluster, pack greedily into the first column that is already free.
+   * Sizing every event by the cluster's total size instead would shrink a chain
+   * of five sequential-but-transitively-linked events to 20% width each.
+   */
+  const flush = () => {
+    if (!cluster.length) return;
+    const columnEnds: number[] = [];
+    const placed = cluster.map((span) => {
+      let column = columnEnds.findIndex((end) => end <= span.start);
+      if (column === -1) {
+        columnEnds.push(span.end);
+        column = columnEnds.length - 1;
+      } else {
+        columnEnds[column] = span.end;
+      }
+      return { span, column };
+    });
+
+    const width = 100 / columnEnds.length;
+    for (const { span, column } of placed) {
+      out.push({
+        event: span.event,
         style: {
           position: 'absolute',
-          top,
-          height,
-          left: `calc(${i * widthPct}% + 4px)`,
-          width: `calc(${widthPct}% - 8px)`,
+          top: span.start,
+          height: span.end - span.start,
+          left: `calc(${column * width}% + 4px)`,
+          width: `calc(${width}% - 8px)`,
         },
-      };
-    }),
-  );
+      });
+    }
+    cluster = [];
+  };
+
+  for (const span of spans) {
+    if (cluster.length && span.start >= clusterEnd) {
+      flush();
+      clusterEnd = -Infinity;
+    }
+    cluster.push(span);
+    clusterEnd = Math.max(clusterEnd, span.end);
+  }
+  flush();
+
+  return out;
 }

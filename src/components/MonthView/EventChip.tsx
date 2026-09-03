@@ -2,18 +2,20 @@ import type { CalendarEvent } from '../../types';
 import styles from './MonthView.module.css';
 
 export function EventChip({ event, onClick }: { event: CalendarEvent; onClick: () => void }) {
+  const time = !event.allDay && event.startTime ? `${event.startTime} ` : '';
   return (
-    <div
+    <button
+      type="button"
       className={styles.chip}
       data-category={event.category}
       title={event.description || undefined}
+      aria-label={`Edit ${event.title}${time ? ` at ${event.startTime}` : ''}`}
       onClick={(e) => {
         e.stopPropagation();
         onClick();
       }}
     >
-      {!event.allDay && <span>{event.startTime} </span>}
-      <span>{event.title}</span>
-    </div>
+      {time}{event.title}
+    </button>
   );
 }

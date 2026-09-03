@@ -1,9 +1,11 @@
 *{box-sizing:border-box;margin:0;padding:0;font-family:var(--font-sans)}
-body{height:100vh;overflow:hidden;background:var(--color-background-tertiary);color:var(--color-text-primary)}
+html,body,#root{height:100%}
+body{overflow:hidden;background:var(--color-background-tertiary);color:var(--color-text-primary);-webkit-text-size-adjust:100%}
 button,input,textarea,select{font:inherit;color:inherit}
-button{cursor:pointer}
-button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--color-accent);outline-offset:1px}
+button{cursor:pointer;background:none;border:none}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--color-accent);outline-offset:1px}
 
+/* Declared after the button reset so category colours win on chip buttons. */
 [data-category="work"]{background:var(--cat-work-bg);color:var(--cat-work-fg)}
 [data-category="personal"]{background:var(--cat-personal-bg);color:var(--cat-personal-fg)}
 [data-category="milestone"]{background:var(--cat-milestone-bg);color:var(--cat-milestone-fg)}

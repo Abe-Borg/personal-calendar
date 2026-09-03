@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Attachment } from '../../types';
 import { deleteAttachment } from '../../db/queries';
+import styles from './AttachmentRow.module.css';
 
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -10,18 +11,31 @@ const formatFileSize = (bytes: number) => {
 
 export function AttachmentRow({ attachment }: { attachment: Attachment }) {
   const [url, setUrl] = useState<string | null>(null);
+
   useEffect(() => {
-    const u = URL.createObjectURL(attachment.data);
-    setUrl(u);
-    return () => URL.revokeObjectURL(u);
+    const objectUrl = URL.createObjectURL(attachment.data);
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
   }, [attachment.data]);
 
   return (
-    <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12 }}>
-      {attachment.mimeType.startsWith('image/') && url && <img src={url} alt={attachment.name} style={{ width: 26, height: 26, objectFit: 'cover' }} />}
-      <span>{attachment.name}</span><span>{formatFileSize(attachment.size)}</span>
-      {url && <a href={url} download={attachment.name}>Download</a>}
-      <button onClick={() => deleteAttachment(attachment.id)}>✕</button>
+    <div className={styles.row}>
+      {attachment.mimeType.startsWith('image/') && url && (
+        <img className={styles.thumb} src={url} alt="" />
+      )}
+      <span className={styles.name} title={attachment.name}>{attachment.name}</span>
+      <span className={styles.size}>{formatFileSize(attachment.size)}</span>
+      {url && (
+        <a className={styles.download} href={url} download={attachment.name}>Download</a>
+      )}
+      <button
+        type="button"
+        className={styles.remove}
+        aria-label={`Remove ${attachment.name}`}
+        onClick={() => void deleteAttachment(attachment.id)}
+      >
+        ✕
+      </button>
     </div>
   );
 }

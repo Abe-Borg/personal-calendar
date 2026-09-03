@@ -1,0 +1,5 @@
+.zone { border:1px dashed var(--color-border-tertiary); border-radius:8px; padding:8px; display:flex; flex-direction:column; gap:6px; }
+.zone[data-dragging='true'] { border-color:var(--color-accent); background:var(--color-background-tertiary); }
+.trigger { font-size:12px; color:var(--color-text-secondary); cursor:pointer; align-self:flex-start; padding:2px 6px; border-radius:5px; }
+.trigger:hover { background:var(--color-background-tertiary); color:var(--color-text-primary); }
+.list { display:flex; flex-direction:column; gap:4px; }
