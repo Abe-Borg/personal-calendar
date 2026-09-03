@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import useStore from '../../store/useStore';
 import { useCalendarNav } from '../../utils/navigation';
+import { defaultNewEventDate } from '../../utils/dateHelpers';
 import styles from './CalendarHeader.module.css';
 
 export function CalendarHeader() {
@@ -8,6 +9,7 @@ export function CalendarHeader() {
   const currentMonth = useStore((s) => s.currentMonth);
   const openAddModal = useStore((s) => s.openAddModal);
   const toggleSidebar = useStore((s) => s.toggleSidebar);
+  const selectedDate = useStore((s) => s.selectedDate);
   const nav = useCalendarNav();
 
   return (
@@ -20,7 +22,7 @@ export function CalendarHeader() {
       </div>
       <h2 className={styles.title}>{format(new Date(currentYear, currentMonth, 1), 'MMMM yyyy')}</h2>
       <div className={styles.right}>
-        <button type="button" className={styles.add} onClick={() => openAddModal()}>+ Add Event</button>
+        <button type="button" className={styles.add} onClick={() => openAddModal(defaultNewEventDate(selectedDate, currentYear, currentMonth))}>+ Add Event</button>
       </div>
     </header>
   );

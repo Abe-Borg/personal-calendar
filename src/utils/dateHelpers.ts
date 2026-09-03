@@ -29,3 +29,15 @@ export const minutesFromMidnight = (time: string | undefined, fallback = 0) => {
   const [h, m] = time.split(':').map(Number);
   return h * 60 + m;
 };
+
+/**
+ * The date a new event should default to. Seeding "today" regardless of the
+ * view filed events into a month the user was not looking at, which read as a
+ * silent save failure.
+ */
+export const defaultNewEventDate = (selectedDate: string | null, year: number, month: number) => {
+  if (selectedDate) return selectedDate;
+  const today = todayISO();
+  const firstOfView = toISODate(new Date(year, month, 1));
+  return today.slice(0, 7) === firstOfView.slice(0, 7) ? today : firstOfView;
+};
