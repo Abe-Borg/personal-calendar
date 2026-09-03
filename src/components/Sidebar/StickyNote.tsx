@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { NOTE_COLOR_NAMES, type StickyNote as StickyNoteType } from '../../types';
 import { deleteNoteWithSnapshot, updateNote } from '../../db/queries';
 import { useToasts } from '../../store/useToasts';
@@ -13,30 +13,40 @@ export function StickyNote({ note }: { note: StickyNoteType }) {
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const pending = useRef<string | null>(null);
 
-  const save = useMemo(
-    () => (content: string) => {
+  const flush = useCallback(() => {
+    if (timer.current) {
+      clearTimeout(timer.current);
+      timer.current = undefined;
+    }
+    if (pending.current === null) return;
+    const content = pending.current;
+    pending.current = null;
+    void updateNote(note.id, { content });
+  }, [note.id]);
+
+  const save = useCallback(
+    (content: string) => {
       pending.current = content;
       if (timer.current) clearTimeout(timer.current);
-      timer.current = setTimeout(() => {
-        pending.current = null;
-        void updateNote(note.id, { content });
-      }, SAVE_DELAY_MS);
+      timer.current = setTimeout(flush, SAVE_DELAY_MS);
     },
-    [note.id],
+    [flush],
   );
 
-  // Without this, unmounting mid-debounce (reorder, sidebar close, refresh)
-  // silently discards the last half-second of typing.
+  // A pending debounce is lost if the component goes away or the page does.
+  // Unmount covers reorder and delete; blur and pagehide cover the window where
+  // a user types and immediately reloads or closes the tab.
+  useEffect(() => flush, [flush]);
+
   useEffect(() => {
-    const id = note.id;
+    const onHidden = () => { if (document.visibilityState === 'hidden') flush(); };
+    document.addEventListener('visibilitychange', onHidden);
+    window.addEventListener('pagehide', flush);
     return () => {
-      if (timer.current) clearTimeout(timer.current);
-      if (pending.current !== null) {
-        void updateNote(id, { content: pending.current });
-        pending.current = null;
-      }
+      document.removeEventListener('visibilitychange', onHidden);
+      window.removeEventListener('pagehide', flush);
     };
-  }, [note.id]);
+  }, [flush]);
 
   const handleDelete = async () => {
     const restore = await deleteNoteWithSnapshot(note.id);
@@ -71,6 +81,7 @@ export function StickyNote({ note }: { note: StickyNoteType }) {
         className={styles.text}
         defaultValue={note.content}
         onChange={(e) => save(e.target.value)}
+        onBlur={flush}
         aria-label="Note text"
         placeholder="Type a note…"
       />
