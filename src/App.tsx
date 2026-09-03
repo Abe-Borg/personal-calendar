@@ -34,6 +34,8 @@ export default function App() {
             <Route path="/calendar" element={<MainPanel />} />
             <Route path="/calendar/:year/:month" element={<MainPanel />} />
             <Route path="/day/:date" element={<MainPanel />} />
+            {/* A stale bookmark or typo left <main> empty with no way back. */}
+            <Route path="*" element={<Navigate to="/calendar" replace />} />
           </Routes>
         </ErrorBoundary>
       </AppShell>
