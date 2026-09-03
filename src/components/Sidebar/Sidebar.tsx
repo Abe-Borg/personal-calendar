@@ -1,5 +1,7 @@
-import { DndContext, closestCenter } from '@dnd-kit/core';
-import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
+import {
+  SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import useStore from '../../store/useStore';
 import { useToasts } from '../../store/useToasts';
 import { addNote, reorderNotes, useNotes, usePinnedEvents } from '../../db/queries';
@@ -18,6 +20,12 @@ export function Sidebar() {
   const notes = useNotes() ?? [];
   const pinned = usePinnedEvents() ?? [];
   const sorted = [...notes].sort((a, b) => a.order - b.order);
+  // The distance constraint keeps a plain click on the handle from starting a
+  // drag; the keyboard sensor makes reordering reachable without a pointer.
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   const handleExport = async () => {
     try {
@@ -68,6 +76,7 @@ export function Sidebar() {
       </div>
 
       <DndContext
+        sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={({ active, over }) => {
           if (!over || active.id === over.id) return;
