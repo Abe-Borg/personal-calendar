@@ -1,5 +1,8 @@
-.zone { border:1px dashed var(--color-border-tertiary); border-radius:8px; padding:8px; display:flex; flex-direction:column; gap:6px; }
-.zone[data-dragging='true'] { border-color:var(--color-accent); background:var(--color-background-tertiary); }
-.trigger { font-size:12px; color:var(--color-text-secondary); cursor:pointer; align-self:flex-start; padding:2px 6px; border-radius:5px; }
-.trigger:hover { background:var(--color-background-tertiary); color:var(--color-text-primary); }
+/* Sticky notes keep a light background in dark mode, so this component's
+   children must take their colours from the surrounding text rather than the
+   theme tokens, which would render pale grey on cream. */
+.zone { border:1px dashed color-mix(in srgb, currentColor 30%, transparent); border-radius:8px; padding:8px; display:flex; flex-direction:column; gap:6px; }
+.zone[data-dragging='true'] { border-color:var(--color-accent); background:color-mix(in srgb, currentColor 8%, transparent); }
+.trigger { font-size:12px; color:inherit; opacity:.7; align-self:flex-start; padding:2px 6px; border-radius:5px; }
+.trigger:hover { background:color-mix(in srgb, currentColor 12%, transparent); opacity:1; }
 .list { display:flex; flex-direction:column; gap:4px; }

@@ -1,7 +1,8 @@
-.row { display:flex; gap:8px; align-items:center; font-size:12px; min-width:0; }
+.row { display:flex; gap:8px; align-items:center; font-size:12px; min-width:0; color:inherit; }
 .thumb { width:26px; height:26px; object-fit:cover; border-radius:4px; flex:none; }
 .name { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.size { color:var(--color-text-secondary); flex:none; }
-.download { color:var(--color-accent); flex:none; }
-.remove { background:none; border:none; color:var(--color-text-secondary); padding:2px 4px; border-radius:4px; flex:none; }
-.remove:hover { background:var(--color-background-tertiary); color:var(--color-danger); }
+.size { opacity:.7; flex:none; }
+.download { color:inherit; opacity:.85; text-decoration:underline; flex:none; }
+.download:hover { opacity:1; }
+.remove { color:inherit; opacity:.6; padding:2px 4px; border-radius:4px; flex:none; }
+.remove:hover { background:color-mix(in srgb, currentColor 14%, transparent); opacity:1; }

@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
 import {
   SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy,
@@ -27,6 +28,16 @@ export function Sidebar() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
+  const importInput = useRef<HTMLInputElement | null>(null);
+
+  const handleAddNote = async () => {
+    try {
+      await addNote({ content: '', color: 'yellow', pinned: false });
+    } catch (err) {
+      pushToast({ message: `Could not add a note: ${(err as Error).message}` });
+    }
+  };
+
   const handleExport = async () => {
     try {
       downloadJson(await exportToJson(), `calendar-${todayISO()}.json`);
@@ -53,23 +64,23 @@ export function Sidebar() {
   return (
     <aside className={styles.sidebar} data-open={sidebarOpen} aria-label="Notes and pinned events">
       <div className={styles.toolbar}>
-        <button type="button" onClick={() => void addNote({ content: '', color: 'yellow', pinned: false })}>
-          + Note
-        </button>
+        <button type="button" onClick={() => void handleAddNote()}>+ Note</button>
         <button type="button" onClick={() => void handleExport()}>Export</button>
-        <label className={styles.importLabel}>
-          Import
-          <input
-            hidden
-            type="file"
-            accept="application/json,.json"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) void handleImportFile(file);
-              e.target.value = '';
-            }}
-          />
-        </label>
+        {/* A <label> wrapping a hidden input is not focusable, so restoring a
+            backup was impossible without a pointer. */}
+        <button type="button" onClick={() => importInput.current?.click()}>Import</button>
+        <input
+          ref={importInput}
+          hidden
+          type="file"
+          tabIndex={-1}
+          accept="application/json,.json"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) void handleImportFile(file);
+            e.target.value = '';
+          }}
+        />
         <button type="button" className={styles.closeDrawer} onClick={toggleSidebar} aria-label="Close sidebar">
           ✕
         </button>
@@ -83,7 +94,8 @@ export function Sidebar() {
           const oldIndex = sorted.findIndex((n) => n.id === active.id);
           const newIndex = sorted.findIndex((n) => n.id === over.id);
           if (oldIndex === -1 || newIndex === -1) return;
-          void reorderNotes(arrayMove(sorted, oldIndex, newIndex).map((n) => n.id));
+          void reorderNotes(arrayMove(sorted, oldIndex, newIndex).map((n) => n.id))
+            .catch((err: Error) => pushToast({ message: `Could not reorder: ${err.message}` }));
         }}
       >
         <SortableContext items={sorted.map((n) => n.id)} strategy={verticalListSortingStrategy}>
