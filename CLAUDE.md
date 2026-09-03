@@ -40,7 +40,7 @@ src/
   App.tsx                 Router, route definitions, mounts MainPanel
   main.tsx                React root, imports global CSS
   components/
-    AppShell/             Sidebar + main layout grid, storage-failure screen
+    AppShell/             Sidebar + main layout grid, storage-failure screen, ErrorBoundary
     CalendarHeader/       Month nav, Today, Add Event, sidebar toggle
     DayView/              24h timeline + all-day strip, click-an-hour to create
     MonthView/            7-col grid, DayCell, EventChip
@@ -87,7 +87,16 @@ Rules:
 - Format with `toISODate`, never `.toISOString().slice(0, 10)`.
 - `useCalendarNav().goToDay` takes an **ISO string**, not a `Date`, so the lossy round-trip can't come back.
 - Construct "today" with `todayISO()` at call time, not once at module scope.
+- **Validate before you store.** A route can match `\d{4}-\d{2}-\d{2}` and still be an impossible date (`/day/2026-02-30`). `RouteSync` gates on `isISODate` for exactly this reason: formatting an Invalid Date throws during render, which used to unmount the whole React root and leave a blank page that navigation could not recover.
 - Date tests must pass in every timezone. Assert invariants, don't pin `TZ`. The suite is checked from UTC+14 to UTC-11.
+
+### Live queries return the *previous* result while a new one loads
+
+`useLiveQuery` keeps returning the last key's value until the new query resolves, so `value === undefined` is **not** a reliable "still loading" test once anything has been loaded. Test identity instead — `existing?.id !== modalEventId`. `EventModal` additionally refuses to render a submittable form during that window: an 18ms gap where the fields still held the previously opened event was enough to overwrite one event's row with another's on save.
+
+### Render failures
+
+`ErrorBoundary` wraps the routed content in `App.tsx`. Without it, one throw inside a view unmounts the entire root and leaves a blank page that only a full reload recovers. Prefer fixing the throw, but keep the boundary: it turns a dead tab into a recoverable message.
 
 ### Persistence
 
@@ -146,7 +155,7 @@ The product is `dist/index.html`. Users without Node double-click the file and t
 - `npm run build` succeeds (this runs `tsc -b` first).
 - `npm test` passes.
 - After date changes, confirm the suite still passes under several timezones, e.g. `TZ=Pacific/Kiritimati npx vitest run` and `TZ=Pacific/Midway npx vitest run`.
-- After router or RouteSync changes, deep-link to `/day/2026-10-15` and `/calendar/2026/10`, then use back/forward.
+- After router or RouteSync changes, deep-link to `/day/2026-10-15` and `/calendar/2026/10`, then use back/forward. Also try `/day/2026-02-30` and `/calendar/2026/47`: shape-valid nonsense must fall back to the current month, not throw.
 - After Dexie schema changes, bump the version number; existing users have v1+ data.
 - After modal/sidebar layout changes, sanity-check `<700px` (the sidebar drawer).
 - Before shipping, open the built `dist/index.html` from `file://` and click through it. Every defect this project has had was an interaction defect that type-checked fine.

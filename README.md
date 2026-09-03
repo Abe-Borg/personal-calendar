@@ -8,13 +8,14 @@ A local-first personal calendar that runs entirely in the browser. No server, no
 - **Day view** with a 24-hour timeline, all-day strip, live current-time indicator, and overlap-aware event layout. Click any hour to create an event at that time
 - **Event editor** with title, date, all-day toggle, start/end times, 8 categories, pin-to-sidebar, description, and **recurrence** (daily / weekly / monthly / yearly with optional end date)
 - **File attachments** on events and sticky notes (any size, kept as Blobs in IndexedDB), with drag-and-drop
-- **Sticky notes** in the sidebar with 4 colors, drag-to-reorder, and per-note attachments
+- **Sticky notes** in the sidebar with 4 colors, per-note attachments, and reordering by dragging the grip handle or by keyboard (focus a handle, <kbd>Space</kbd>, arrow keys, <kbd>Space</kbd>)
 - **Pinned-events list** in the sidebar, click to jump to the day
 - **JSON export / import** for portable backup, with validation on the way in
 - **Toast undo** on event and note delete
 - **Keyboard shortcuts**: `←` / `→` (prev/next month), `T` (today), `N` (new event), `Esc` (close modal). They stay out of the way while you are typing
 - **URL routing** — `/calendar`, `/calendar/YYYY/MM`, and `/day/YYYY-MM-DD` all work as deep links and respond to back/forward
 - **Dark mode**, following your OS setting
+- **Recoverable errors** — a bad link or an unexpected failure shows an explanation with a way back, rather than a blank page
 
 ## Running locally
 
@@ -76,6 +77,7 @@ There is no linter configured. `npm run build` runs `tsc -b` first, so type erro
 - **Monthly series clamp to the last day of shorter months.** A monthly event on the 31st shows on Feb 28 (or Feb 29), then returns to the 31st in March. It never drifts and always fires once per month.
 - **No reminders, notifications, time zones, or sharing.** Everything is stored and displayed in whatever timezone the browser is currently in.
 - **Single-user, single-browser** — no sync across devices.
+- **Editing a note is saved shortly after you stop typing**, or immediately when you click away. Closing the tab mid-keystroke without leaving the field can drop the last fragment.
 - **Week view, search, and month drag-to-move are not implemented.**
 
 ## License
