@@ -106,9 +106,17 @@ Rules:
 
 Soft-deletes are not used. `deleteEvent` and `deleteNote` are hard deletes inside transactions that also drop linked attachments. Undo is implemented via snapshot helpers (`deleteEventWithSnapshot`, `deleteNoteWithSnapshot`) that capture the row + attachments, perform the delete, and return a `restore()` callback. Callers push a toast with that callback as the action. Restores use `put`, not `add`, so undo still works if the user re-created the row first.
 
+### Display order
+
+IndexedDB returns same-date rows in primary-key order, which is uuid order — effectively random. Anything rendering a day's events must sort them; `compareForDisplay` (`utils/eventLayout.ts`) is the single definition (all-day first, then start time, then title) and both `useEventsForMonth` and `useEventsForDate` apply it. Without it the month grid and the day view disagree about both order and which event hides behind "+N more".
+
+### Storage writes can fail
+
+Quota exhaustion and blocked site data make any Dexie write reject. An unhandled rejection here is invisible: the file simply is not attached, the event simply is not saved. Every write reachable from the UI surfaces its failure — a toast, or an inline error that keeps the dialog open so the user's typing survives. If you add a new write path, handle its rejection.
+
 ### Backup
 
-`utils/backup.ts` owns export/import. It uses `Blob.arrayBuffer()` + `btoa`, **not `FileReader`** — FileReader is browser-only and made the only backup path in a local-first app untestable.
+`utils/backup.ts` owns export/import. **`btoa` returns an empty string instead of throwing** once its result would exceed the engine's maximum string length (measured: 402,653,166 input bytes encode, one more does not), so `bytesToBase64` checks its own output length — without that, export wrote a backup whose payload was silently gone and reported success. It uses `Blob.arrayBuffer()` + `btoa`, **not `FileReader`** — FileReader is browser-only and made the only backup path in a local-first app untestable.
 
 Import validates before it writes: version gate, then `parseEvent` / `parseNote` / `parseAttachment` per row, skipping and counting anything malformed. Never `bulkPut` straight from `JSON.parse`. If you add a field to a stored type, add it to the matching parser or it will be silently dropped on restore.
 
