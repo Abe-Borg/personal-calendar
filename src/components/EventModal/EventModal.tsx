@@ -64,7 +64,10 @@ export function EventModal() {
       initializedFor.current = null;
       return;
     }
-    if (modalEventId && existing === undefined) return;
+    // Identity, not emptiness: dexie-react-hooks keeps returning the PREVIOUS
+    // row while a new key loads, so `undefined` is not a reliable "still
+    // loading" test once any event has been opened.
+    if (modalEventId && existing?.id !== modalEventId) return;
 
     const key = modalEventId ?? `new:${modalDefaultDate ?? ''}:${modalDefaultTime ?? ''}`;
     if (initializedFor.current === key) return;
